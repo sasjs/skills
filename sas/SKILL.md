@@ -19,7 +19,7 @@ Write idiomatic, production-quality SAS code. This skill covers the SAS language
 
 ## Non-negotiable: no WARNINGs
 
-Generated SAS code must run cleanly — **zero WARNINGs (and zero ERRORs) in the log**. Treat every `WARNING:` as a defect: uninitialized variables, implicit type conversions, truncation notes that should be warnings, "no observations", unresolved macro references, etc. If a warning is truly unavoidable, suppress it deliberately (e.g. an explicit option) and comment why. Likewise avoid superfluous NOTEs where reasonable (e.g. use `nodupkey` rather than relying on duplicate diagnostics).
+Generated SAS code must run cleanly — **zero WARNINGs (and zero ERRORs) in the log**. Treat every `WARNING:` as a defect: uninitialized variables, implicit type conversions, truncation notes that should be warnings, "no observations", unresolved macro references, etc. If a warning is truly unavoidable, suppress it deliberately (e.g. an explicit option) and comment why. Likewise avoid superfluous NOTEs where reasonable.
 
 ## Style rules
 
@@ -35,7 +35,7 @@ These follow the @sasjs/core coding standards — apply them to all SAS code:
 - Prefer `proc sort` with `nodupkey` over manual dedup logic
 - Macros:
   - Define with parentheses, even with no parameters: `%macro x();` not `%macro x;`
-  - Closing `%mend;` must NOT repeat the macro name
+  - Closing `%mend;` must repeat the macro name
   - Macro calls are not terminated with a semicolon: `%my_macro()` not `%my_macro();`
   - Mandatory parameters positional; optional parameters keyword (`var=`) style
   - Macro names lowercase, verb-noun convention

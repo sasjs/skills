@@ -13,8 +13,8 @@ npx skills add sasjs/skills
 Install (or preview) an individual skill by appending `@<skill-name>`:
 
 ```bash
-npx skills add sasjs/skills@sasjs-core      # install one skill
-npx skills use sasjs/skills@sas             # generate a prompt for one skill without installing
+npx skills add sasjs/skills@sasjs-core # install one skill
+npx skills use sasjs/skills@sas        # generate a prompt for one skill w/o installing
 ```
 
 Available skill names: `sas`, `sasjs-core`, `sasjs-cli`, `sasjs-adapter`, `sasjs-framework`, `sasjs-server`.
