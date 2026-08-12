@@ -38,11 +38,11 @@ npx skills remove sasjs-core     # remove a skill
 
 ## Using with GitHub Copilot in VS Code
 
-Skills are agent-agnostic — each is just a folder with a `SKILL.md` (name, description, instructions). VS Code Copilot auto-discovers skills in `.claude/skills/` (and `.github/skills/`) in your workspace, and loads them into whichever model is handling the turn (including Auto mode) when your prompt matches a skill's description.
+Skills are agent-agnostic — each is just a folder with a `SKILL.md` (name, description, instructions). The `npx skills` installer writes them to the standard `.agents/skills/` directory, which VS Code Copilot auto-discovers (it also checks `.github/skills/`), loading each skill into whichever model is handling the turn (including Auto mode) when your prompt matches a skill's description.
 
 To set up:
 
-1. Run `npx skills add sasjs/skills` from your project root, or simply copy the skill folders you want into `.claude/skills/` in your repo.
+1. Run `npx skills add sasjs/skills` from your project root, or simply copy the skill folders you want into `.agents/skills/` in your repo.
 2. Commit the folder so your whole team gets the skills automatically.
 3. No further wiring needed. When a skill is relevant, Copilot reads its instructions before answering (e.g. DATA step questions trigger `sas`; `sasjs build` questions trigger `sasjs-cli`).
 
