@@ -51,7 +51,26 @@ Use `mf_` macros when the macro returns a value usable in an expression; use `mp
 
 ## Reuse before writing
 
-Before writing a new macro, check the library for an existing one — common utilities already exist, e.g. `mf_abort`, `mf_existds`, `mf_existvar`, `mf_existfileref`, `mf_getuser`, `mp_jsonout` (SAS datasets → JSON for `_webout`), `mp_ds2ddl`, `mp_hashdataset`. Platform-specific variants exist under `meta/`, `viya/`, `server/` and are selected at compile time by the CLI.
+Before writing a new macro, check the library for an existing one — common utilities already exist, e.g. `mp_abort` (the deprecated `mf_abort` is retained for backwards compatibility — don't use it in new code), `mf_existds`, `mf_existvar`, `mf_existfileref`, `mf_getuser`, `mp_jsonout` (SAS datasets → JSON for `_webout`), `mp_ds2ddl`, `mp_hashdataset`. Platform-specific variants exist under `meta/`, `viya/`, `server/` and are selected at compile time by the CLI.
+
+## Aborting safely
+
+Never invoke `%mp_abort` from inside an `%if/%else` block — as a procedural macro, the macro processor can continue executing statements after it before the abort takes effect. Use the `iftrue=` condition parameter instead:
+
+```sas
+%mp_abort(iftrue= (&syscc ne 0)
+  ,mac=&_program
+  ,msg=%str(Something went wrong)
+)
+```
+
+When `%mp_abort` is called from within a `%include` block, SAS cannot exit cleanly (e.g. to `_webout`). Call `%mp_abort(mode=INCLUDE)` after the include (OUTSIDE any macro wrapper) — it checks `work.mp_abort_errds` for an abort status:
+
+```sas
+%mp_abort(mode=INCLUDE)
+```
+
+Note: `%include`s inside macros should be performed with `%mp_include()` so the `_SYSINCLUDEFILEDEVICE` indicator is set and the abort dataset (`work.mp_abort_errds`) is passed back to the calling program.
 
 ## Lint and build
 

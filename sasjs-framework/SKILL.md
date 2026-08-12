@@ -49,7 +49,7 @@ The full JSON schema is bundled at `sasjsconfig-schema.json` next to this file â
   @brief Example service returning data
   <h4> SAS Macros </h4>
   @li mp_jsonout.sas
-  @li mf_abort.sas
+  @li mp_abort.sas
 **/
 
 /* validation / logic here */
@@ -59,7 +59,16 @@ The full JSON schema is bundled at `sasjsconfig-schema.json` next to this file â
 %mp_jsonout(CLOSE)
 ```
 
-4. On error, abort cleanly (e.g. `%mf_abort(...)` / `%mp_abort(...)`) so the adapter receives a structured error in the JSON, not a half-written response.
+4. On error, abort cleanly with `%mp_abort(...)` (`mf_abort` is deprecated) so the adapter receives a structured error in the JSON, not a half-written response. Do **not** call `%mp_abort` inside an `%if/%else` block â€” the macro processor may keep executing beyond the abort. Use the conditional `iftrue=` parameter instead, e.g.:
+
+```sas
+%mp_abort(iftrue= (%mf_existds(work.results)=0)
+  ,mac=&_program
+  ,msg=%str(No results found)
+)
+```
+
+If the abort happens inside a `%include` block, SAS cannot exit to `_webout` cleanly â€” after the include, call `%mp_abort(mode=INCLUDE)` (outside any macro wrapper), which checks `work.mp_abort_errds` for an abort status.
 
 ## Multi-target discipline
 
@@ -69,6 +78,7 @@ The full JSON schema is bundled at `sasjsconfig-schema.json` next to this file â
 ## Quality gates (follow the conventions of mature apps like Data Controller)
 
 - Run `sasjs lint` after touching any `.sas` file; fix all warnings in files you touched.
+- The linter enforces 2-space indentation everywhere, including continuation lines inside `/* ... */` block comments â€” never align comment text with 3+ spaces.
 - Add tests under `sasjs/tests` and run `sasjs test` for backend logic changes.
 - Provide mocks in `sasjs/mocks` so the frontend can be developed without a live SAS server.
 - Never auto-commit or bump versions; releases are pipeline-driven (conventional commits).

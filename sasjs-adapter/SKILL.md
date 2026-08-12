@@ -51,6 +51,6 @@ const response = await sasjs.request('services/common/getdata', {
 ## Tips
 
 - Set `debug: true` to surface the SAS log in responses while developing.
-- Always handle `response.status` / error responses — SAS-side errors (e.g. from `mf_abort` / `mp_abort`) come back in the JSON, not necessarily as HTTP errors.
+- Always handle `response.status` / error responses — SAS-side errors (e.g. from `%mp_abort`) come back in the JSON, not necessarily as HTTP errors.
 - For large payloads prefer CSV upload or streamed files over JSON input tables.
 - Keep `appLoc` consistent with the `appLoc` in `sasjsconfig.json` used to deploy.
