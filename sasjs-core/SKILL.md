@@ -13,7 +13,7 @@ description: Standards and conventions for the @sasjs/core SAS macro library (mf
 - Macro definitions must use parentheses: `%macro x();` not `%macro x;`
 - Macro *calls* are NOT terminated with a semicolon: `%my_macro()` not `%my_macro();`
 - All macro variables must be declared `%local` to prevent scope leakage
-- 2-space indentation, no tabs, no trailing spaces, no invisible characters, max line length 300
+- 2-space indentation, no tabs, no trailing spaces, no invisible characters, max line length 300 (hard lint limit) but keep lines to 80 chars max where possible
 - Every file must have a Doxygen header:
 
 ```sas
