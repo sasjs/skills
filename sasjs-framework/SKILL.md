@@ -87,4 +87,7 @@ If the abort happens inside a `%include` block, SAS cannot exit to `_webout` cle
 
 ## Reference implementations
 
-Look at existing apps for patterns: folder layouts, `sasjsconfig.json` multi-target setups, service structure, streaming builds, and test/mock conventions (e.g. Data Controller, react-seed-app, macro-dash).
+Look at existing apps for patterns: folder layouts, `sasjsconfig.json` multi-target setups, service structure, streaming builds, and test/mock conventions, eg:
+* https://git.datacontroller.io/dc/dc
+* https://github.com/sasjs/react-seed-app
+* https://github.com/sasjs/macro-dash
