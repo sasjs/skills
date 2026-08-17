@@ -1,6 +1,6 @@
 ---
 name: sasjs-core
-description: Standards and conventions for the @sasjs/core SAS macro library (mf_*, mp_*, mm*, ms_*, mv_* macros). Use when writing or editing SAS macros in a sasjs/core-style repo, when choosing an existing macro instead of reinventing one, or when asked about the sasjs/core build, lint, doxygen header, or testing conventions.
+description: Standards and conventions for the @sasjs/core SAS macro library (mf_*, mp_*, mm*, ms_*, mv_* macros). Use when writing or editing SAS macros in a sasjs/core-style repo, picking an existing macro over reinventing one, or the sasjs/core build, lint, doxygen, and testing conventions.
 ---
 
 # @sasjs/core — SAS Macro Library
