@@ -95,6 +95,14 @@ If the abort happens inside a `%include` block, SAS cannot exit to `_webout` cle
 - Markdown files: no hard wrapping — one paragraph per line.
 - Apps must work offline/on-prem: no external CDN assets in the frontend bundle.
 
+## Tests must be idempotent
+
+A test file must pass when run repeatedly (including after a run that failed partway).
+
+- Start the file with `%let syscc=0;` — many DC macros abort on entry if `&syscc>0`, and any `WARNING` in a previous test bumps `syscc` to 4.
+- Make prep defensive: delete-then-insert config records (handles leftovers from an aborted run),
+  and recreate physical tables rather than assuming they are absent.
+
 ## Reference implementations
 
 Look at existing apps for patterns: folder layouts, `sasjsconfig.json` multi-target setups, service structure, streaming builds, and test/mock conventions, eg:
