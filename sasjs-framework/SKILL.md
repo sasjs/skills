@@ -82,7 +82,7 @@ If the abort happens inside a `%include` block, SAS cannot exit to `_webout` cle
 
 ## Sanitising service inputs (SAS macro injection)
 
-Every value arriving from the web request (input tables, `SASCONTROLTABLE` fields, url params) is attacker-controlled. If it is resolved as a macro variable inside generated code — a `libname` path, a `set`/`from` statement, a `where` clause, a `%include` — then spaces, quotes, semicolons and `&`/`%` macro triggers become classic SAS injection vectors.
+Every value arriving from the web request (input tables, url params) is attacker-controlled. If it is resolved as a macro variable inside generated code — a `libname` path, a `set`/`from` statement, a `where` clause, a `%include` — then spaces, quotes, semicolons and `&`/`%` macro triggers become classic SAS injection vectors.
 
 Rules:
 
@@ -90,7 +90,6 @@ Rules:
 - Where a whitelist exists, use it: after syntactic validation, confirm the value exists in a control table (eg a primary-key lookup) before using it to build paths or code.
 - Values read back from control tables can also be tampered with — validate those too before passing them into code-generating macros.
 - For free-text values that must be echoed into code (eg a user message), strip macro triggers: `compress(value,'&%;')` or `tranwrd` each dangerous char — but prefer not to place free text in code at all.
-- Reference: the validate-then-symput pattern in Data Controller's `viewdata.sas` / `getdata.sas`.
 
 ```sas
 %let libds=0;
