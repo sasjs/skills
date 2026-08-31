@@ -2,7 +2,7 @@
 name: sas
 description: Expert guidance for the SAS programming language — DATA step, PROC SQL, macro language, formats, ODS, and common procedures. Pure SAS syntax only, no SASjs-framework content. Use when writing, reviewing, or debugging .sas programs, or answering SAS language questions.
 license: MIT
-copyright: Copyright (c) 2025 SASjs
+copyright: Copyright (c) SASjs
 spdx-license-identifier: MIT
 ---
 
