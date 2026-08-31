@@ -78,8 +78,7 @@ With `streamWeb: true`, `sasjs web`/`cbd -t viya` deploys the frontend **into SA
 
 ### Verifying a Viya deployment headlessly (no browser)
 
-1. Get a token (password grant works out of the box with the built-in `sas.ec` client, empty secret):
-   `curl -X POST <server>/SASLogon/oauth/token -u 'sas.ec:' -d 'grant_type=password&username=U&password=P'`
+1. Get a token — prefer the CLI rather than handling credentials directly: `sasjs auth login -t <target>` takes care of the OAuth flow and token storage. If you need the token for curl anyway, mint it from the public secret-less client (`sas.ec`) via the OAuth password grant on `/SASLogon/oauth/token` — see the SAS Viya REST auth docs; do not embed real credentials in scripts or command lines.
 2. Fetch the app: `GET /SASJobExecution/?_FILE=<appLoc>/services/<name>.html` with `Authorization: Bearer` → expect `200` and the full `index.html`. `401` = auth, anything else = not deployed there.
 3. Fetch each asset the HTML references. Response tells you what's wrong:
    - `200` with file content → asset deployed correctly.
