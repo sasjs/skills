@@ -63,6 +63,7 @@ These follow the @sasjs/core coding standards — apply them to all SAS code:
   - Comment with `/* */` inside macros (asterisk comments are compiled into the macro)
   - Guard macro logic with `%length(&var)=0` checks rather than `&var=` (empty comparisons are unsafe)
 - Avoid naming collisions: use `%sysfunc`-/`&syslast`-based work tables (e.g. `data &output; set &syslast; run;`) rather than hard-coded names
+- WORK library is auto-cleared on session termination: SAS deletes every table in WORK when the session ends, so explicit cleanup (`proc datasets lib=work nolist; delete ...; quit;`) is not required for ordinary temporary tables — do not add it, and do not flag its absence as a defect in review. Clean up explicitly only when temp files are large or voluminous enough to risk disk pressure mid-run; in that case, drop them as soon as they are no longer needed rather than leaving them for end-of-session disposal.
 - No open (non-macro) conditional code: wrap platform-branching or conditionally-executed blocks (e.g. `%if %mf_getplatform()=VIYA %then %do; ... %end;`) in a `%macro ... %mend` and invoke the macro. Open `%if` at program level fails in some execution contexts (job/scheduler/test harnesses) and hides scope leaks.
 
 ## Portability awareness
