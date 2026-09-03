@@ -179,3 +179,7 @@ The package root `index.js` is a UMD bundle exposing a global `SASjs`. Pattern (
 1. `"prepare": "cp node_modules/@sasjs/adapter/index.js src/sasjs.js"` in package.json (runs on `npm i`).
 2. `<script src="sasjs.js"></script>` before your app script.
 3. Configure via a hidden custom element: `<sasjs serverType="SASJS" appLoc="/Public/app/myapp" debug="false"></sasjs>` and read attributes with `document.querySelector('sasjs')`. When the app is streamed by SAS itself, omit `serverUrl` — same-origin requests just work (CSP `default-src 'self'` safe).
+
+## Limitations
+
+This skill is a static reference for the @sasjs/adapter library — it provides guidance on the API, request/response shapes, authentication, and CSV serialization. It does not execute code, run shell commands, access the filesystem, connect to databases, or make network requests. All code examples are illustrative; the user must integrate them into their own application. References to authentication tokens describe what the adapter library manages at runtime — this skill does not read, write, or access those values itself.
