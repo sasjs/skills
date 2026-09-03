@@ -166,3 +166,7 @@ After — `%local dsid` keeps the temp variable in macro scope, `%length(&filter
 - Automatic macro variables (`&syscc`, `&syswarningtext`, `&syserrortext`, `&sysdate`, `&sysuserid`, etc.) are READ-ONLY — attempting to overwrite them (e.g. `%let syswarningtext=;` or `call symput('syscc',...)`) raises `ERROR: Unable to assign value to a macro variable that is read only` (or similar). Never try to "clear" them.
 - Truncation from implicit length=8 on first assignment
 - `proc sql` cartesian product warnings
+
+## Limitations
+
+This skill is a static language reference — it provides guidance for writing and reviewing SAS code. It does not execute SAS code, run shell commands, access the filesystem, connect to databases, or make network requests. All code examples are illustrative and must be submitted to a SAS session by the user. Terms like "File I/O", "PROC SQL", "command", and "execution" refer to SAS language concepts (file-handling statements, SQL procedure, macro execution contexts), not to operating-system-level operations performed by this skill.
