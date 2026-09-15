@@ -58,8 +58,8 @@ sasjs cbd                 # compile + build + deploy in one step (-t viya etc.)
 
 - Run `npm i` before `sasjs cb` — macro dependency resolution needs `node_modules/@sasjs/core` present, and `@sasjs/core` (and `@sasjs/adapter` if used) must be listed in `package.json`.
 - Credentials files are per-target: env files named `.env.<targetname>` (e.g. `.env.server`) with `CLIENT`, `ACCESS_TOKEN`, and `REFRESH_TOKEN` entries. Never commit them — gitignore `.env*`.
-- sasjs/cli CI runs the jest suite on BOTH ubuntu and windows runners. Specs that assert unix-mode bits (exec bit via `chmod`) or create symlinks fail on the Windows runner (chmod is a no-op on NTFS; unprivileged symlink creation is blocked) — guard those assertions with `isWindows()` from `@sasjs/utils` and return early.
-- adm-zip in the CLI is replaced by yauzl/yazl (PR #1467, GHSA-vwc7-r8mq-g2x9): extraction goes through `src/utils/zip.ts` `extractZip(zipPath, destDir, overwrite)`, which refuses to follow destination symlinks and preserves unix mode bits. Do not reintroduce adm-zip while its advisory range (`>=0.5.9 <=0.6.0`, no patched release) is open; if a spec needs zip fixtures, build them with yazl (`addBuffer`).
+- sasjs/cli CI runs the jest suite on BOTH ubuntu and windows runners. Specs that assert unix-mode bits (exec bit via `chmod`) or create symlinks fail on the Windows runner (chmod is a no-op on NTFS; unprivileged symlink creation is blocked) - guard those assertions with `isWindows()` from `@sasjs/utils` and return early.
+- adm-zip in the CLI is replaced by yauzl/yazl (PR #1467, GHSA-vwc7-r8mq-g2x9): extraction goes through `src/utils/zip.ts` `extractZip(zipPath, destDir, overwrite)`, which refuses to follow destination symlinks and preserves unix mode bits. Do not reintroduce adm-zip while its advisory range (`>= 0.5.9, <= 0.6.0`, no patched release upstream) is open; if a spec needs zip fixtures, build them with yazl (`addBuffer`).
 
 ## Viya auth without a client/secret (`sasjs auth login`)
 
