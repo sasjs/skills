@@ -17,7 +17,7 @@ npx skills add sasjs/skills@sasjs-core # install one skill
 npx skills use sasjs/skills@sas        # generate a prompt for one skill w/o installing
 ```
 
-Available skill names: `sas`, `sasjs-core`, `sasjs-cli`, `sasjs-adapter`, `sasjs-framework`, `sasjs-server`.
+Available skill names: `sas`, `sas-packages`, `sasjs-core`, `sasjs-cli`, `sasjs-adapter`, `sasjs-framework`, `sasjs-server`.
 
 Other useful commands:
 
@@ -30,6 +30,7 @@ npx skills remove sasjs-core     # remove a skill
 | Skill | Description |
 |---|---|
 | `sas` | Pure SAS language expertise - DATA step, PROC SQL, macro language, formats, ODS. No SASjs content. |
+| `sas-packages` | Installing/loading/unloading SAS packages with the SAS Packages Framework (SPF) and the SASPAC archive - packages fileref rules, version pinning, install failure modes. |
 | `sasjs-core` | Standards and conventions for the @sasjs/core SAS macro library (doxygen headers, lint rules, macro prefixes, reuse catalog). |
 | `sasjs-cli` | Using @sasjs/cli: create/compile/build/deploy/run/test workflows, targets, auth, service packs, frontend streaming. |
 | `sasjs-adapter` | Frontend/Node integration with SAS backends via @sasjs/adapter (requests, auth per server type, sessions, file upload). |
