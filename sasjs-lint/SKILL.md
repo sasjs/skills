@@ -1,6 +1,6 @@
 ---
 name: sasjs-lint
-description: Linting and formatting SAS code with @sasjs/lint - the .sasjslint rules and their defaults, severityLevel and exit codes, per-file @sasjslint overrides, what the formatter fixes, and how the SASjs CLI, VS Code extension and SASjs Server run it. Use when configuring lint rules, resolving a lint warning, or wiring lint into CI, a git hook or an editor.
+description: Linting and formatting SAS code with @sasjs/lint - the .sasjslint rules and their defaults, the macro-declaration rules and ignoredMacros, banned strings, severityLevel and exit codes, per-file @sasjslint overrides, what the formatter fixes, and how the SASjs CLI, VS Code extension and SASjs Server run it. Use when configuring lint rules, resolving a lint warning, or wiring lint into CI, a git hook or an editor.
 license: MIT
 copyright: Copyright (c) SASjs
 spdx-license-identifier: MIT
@@ -13,6 +13,8 @@ spdx-license-identifier: MIT
 `@sasjs/lint` is the linting and formatting engine for SAS code. It is a TypeScript library with no SAS dependency - it reads `.sas` files as text - and it is the single engine behind `sasjs lint`, the SASjs VS Code extension's Problems panel, and the SASjs Server Studio editor.
 
 This skill covers the rules, the `.sasjslint` file, the formatter, and the ways to invoke it. It does not cover the SAS language itself (see `sas`) or the rest of the CLI (see `sasjs-cli`).
+
+The rules and defaults below were checked against `@sasjs/lint` 4.5.0, the version bundled by `@sasjs/cli` 6.2.5. The library gains rules over time, so a surface that pins an older copy will not have all of them - see *Where it runs*.
 
 ## When to use
 
@@ -72,6 +74,8 @@ Two groups, and the way you switch a rule off depends on which group it is in.
 | `strictMacroDefinition` | true | WARNING | no space in a parameter name (`%macro m(my var);`), no unrecognised option (`%macro m()/nonsense;`) |
 | `noUndeclaredMacros` | true | WARNING | every macro a file calls is declared in the file or its header |
 | `noUnusedMacros` | true | WARNING | every macro in `<h4> SAS Macros </h4>` is actually called |
+| `noNestedCommentsInHeader` | true | WARNING | the opening Doxygen header holds no `*/`, which SAS reads as the end of the comment - anything after it, `@param` lines and usage examples included, is compiled as SAS |
+| `noBannedStrings` | true | WARNING | no configured string on a line, by default the log-lookalike words `error `, `error:`, `warning `, `warning:`. Case-insensitive, comments included |
 | `noTrailingSpaces` | true | WARNING | no line ends in whitespace |
 | `noTabs` | true | WARNING | no tab characters. Alias: `noTabIndentation` (deprecated) |
 | `noGremlins` | true | WARNING | no zero-width or otherwise non-standard characters |
@@ -102,6 +106,8 @@ Two groups, and the way you switch a rule off depends on which group it is in.
 | `maxDataLineLength` | 80 | line limit inside `datalines` / `cards` / `parmcards` records |
 | `requiredMacroOptions` | `[]` | options required by `hasRequiredMacroOptions` |
 | `ignoredLibnames` | `[]` | librefs `noUnusedLibnames` leaves alone |
+| `ignoredMacros` | `["webout"]` | macro names `noUndeclaredMacros` treats as declared. Replaces the default when set - see below |
+| `bannedStrings` | `["error ", "error:", "warning ", "warning:"]` | strings `noBannedStrings` reports. Replaces the default when set - see below |
 
 ## Severity and exit codes
 
@@ -141,6 +147,39 @@ A file adjusts the rules that apply to itself with a `@sasjslint` block in its D
 - The header wins over the configuration the caller passes.
 - `ignoreList` is the one setting a header cannot use: it is evaluated before the file is read.
 - Place the block **outside** the `<h4> SAS Macros </h4>` section, which the formatter rewrites.
+
+## `ignoredMacros` and `bannedStrings`
+
+Both are lists whose project-level value **replaces** the built-in default rather than extending it: an explicit `ignoredMacros` drops `webout` unless it is restated, and `"bannedStrings": []` reports nothing at all. A per-file `@sasjslint` block is the opposite - arrays are additive there, so a file adds entries to the project's list without restating them.
+
+`ignoredMacros` is read by `noUndeclaredMacros` only. It does nothing for `noUnusedMacros`, so the mirror-image warning - a macro declared in the header and never called - cannot be silenced that way; remove the entry or switch that rule off for the file.
+
+### Why `ignoredMacros` exists: macros that arrive through a provider
+
+The linter reads one file plus the config. It knows nothing about the rest of the build, and `sasjs lint` passes it nothing from `sasjsconfig.json`. A macro therefore has to be declared in the file that calls it, even when the compile makes it available some other way:
+
+- a **serviceInit** program (`serviceInit` in the target config, compiled into every service) declares macro files in its own `<h4> SAS Macros </h4>` - a service body may call those macros without declaring them, and is warned once per call;
+- a **testSetUp** / **testInit** program, the same shape for `sasjs test`;
+- whatever the compiler injects itself: `%webout` is the built-in case, which is why `webout` is in the default list.
+
+For those, the project `.sasjslint` is the right place:
+
+```json
+{
+  "ignoredMacros": ["webout", "mpeinit", "mpeterm"]
+}
+```
+
+Two cautions. Restate `webout`, since the list replaces the default and dropping it reports `%webout` in every service that streams. And a project-wide entry also silences the check in files where the macro is genuinely missing, so list only a macro that reaches every file which may call it; a file-local `@sasjslint {"ignoredMacros": [...]}` is the tighter option when the provider covers a few files rather than all of them.
+
+### `bannedStrings`
+
+The four defaults are words that look like a log message: a comment or a `%put` holding one turns up in a grep of the SAS log, and in any log scanner built on one, so a real problem is easy to lose among matches that were only prose. The match is case-insensitive, runs longest-string-first without double-reporting overlapping spans, and skips two things:
+
+- `datalines` / `cards` / `parmcards` records, where the text is data rather than code;
+- the line carrying the `@sasjslint` block itself, so a file may configure a banned string in its own override.
+
+Reword prose. When the text has to survive verbatim in the log, split the word with a macro function: `%put %str(WARN)ING: message` prints `WARNING: message` and no longer holds the literal. A doxygen `@warning` tag is content rather than prose, so that file wants `@sasjslint {"noBannedStrings": false}`.
 
 ## The formatter
 
@@ -183,8 +222,11 @@ Passing an explicit `LintConfig` matters when the caller knows the rules - a ser
 
 - **Off means something different per rule.** The on-by-default rules switch off with `false`; `maxLineLength` switches off with `0`; `lineEndings` switches off with `"off"`; the off-by-default rules ignore `false` (it is the same as leaving them out) and need `true`. Getting this wrong is the most common reason a rule "does not work".
 - **`maxHeaderLineLength` and `maxDataLineLength` are inert when `maxLineLength` is off**, because they are scoped to it. The effective limit is the *higher* of the two values, so setting one lower than `maxLineLength` is silently ignored.
+- **An explicit list replaces the default, for `ignoredMacros` and `bannedStrings` alike.** The default is seeded only when the setting is absent, so `"ignoredMacros": ["mpeinit"]` stops ignoring `webout`, and `"bannedStrings": []` reports nothing rather than falling back to the defaults. Restate the defaults you still want.
 - **`noUnusedMacros` plus the formatter removes `@li` dependencies.** Those entries are consumed by the compiler, so a macro referenced only indirectly - through a dynamic `%&name` call, or supplied by an `%include`d program - loses its declaration and the job can fail to assemble. Switch the rule off for the project or the file when that applies.
+- **A header entry can be load-bearing without the file calling the macro, so verify before pruning.** The compiler also inlines whatever another declared macro's own `<h4>` asks for, so an entry may be a duplicate of that chain (safe to drop, and the generated program does not change) or the only route by which the macro reaches the file (dropping it breaks the build). The check is to compile and grep the artefact: `sasjs compile` then `grep -c "%macro <name>" sasjsbuild/services/<path>.sas` before and after the edit.
 - **`noUndeclaredMacros` does not see `SASAUTOS`.** Macros that ship with SAS are always treated as declared (the list is generated from `@sasjs/sas-language`), but macros made available through `SASAUTOS` are invisible to the linter and are reported. Declare them in the header or switch the rule off.
+- **`noBannedStrings` reports the word in a comment or in header prose, not only in code.** A file can read as clean and still trip it, and the `[line, column]` points at the word itself. See *`bannedStrings`* for the three options - reword, `%str(WARN)ING`, or a per-file override for a doxygen tag.
 - **`noUnusedLibnames` is deliberately generous.** A libref counts as used if it appears anywhere outside a `LIBNAME` statement - including inside a double-quoted string, as in `pathname("outData", "L")`. It is off by default because a file is not a complete job, and it has no formatter fix.
 - **An empty `.sasjslint` is not the same as no `.sasjslint`** only for settings whose default was previously applied conditionally. Since 4.0.0 an absent `maxLineLength` or `hasMacroNameInMend` falls back to its documented default (80, and `true`), so a project that relied on omitting them to disable those rules must now set `"maxLineLength": 0` or `"hasMacroNameInMend": false`.
 - **`allowedGremlins` entries are strings, not numbers**: `"0x0080"`, exactly four hex digits.
@@ -197,3 +239,5 @@ Passing an explicit `LintConfig` matters when the caller knows the rules - a ser
 - Confirm a config change took effect: run `npx sasjs lint` before and after editing `.sasjslint`, and compare the rows. A rule that is off by default needs `true`, not `false`.
 - Confirm the formatter's effect: run `npx sasjs lint fix` and inspect the diff - the `<h4> SAS Macros </h4>` section and `%mend` lines are the ones it rewrites.
 - Confirm a per-file override: add the `@sasjslint` block, run `sasjs lint`, and check that the rule it switches off no longer reports for that file while still reporting for its neighbours.
+- Confirm a banned string: put `%put WARNING: test;` in a file and run `sasjs lint` - a row appears at that line and column. Rewrite it as `%put %str(WARN)ING: test;` and the row goes while the log line still reads `WARNING: test`.
+- Confirm `ignoredMacros`: lint a file that calls a macro it does not declare, add the name to the project `.sasjslint`, and the row disappears. Then remove `webout` from that same list and confirm `%webout` starts reporting in a service that calls it - the list replaces the default rather than extending it.
