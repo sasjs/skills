@@ -110,6 +110,20 @@ Note: `%include`s inside macros should be performed with `%mp_include()` so the 
 
 - Assertions go to `work.test_results` via `%mp_assert(iftrue=(...), desc=..., outds=work.test_results)`.
 
+- **A macro that writes its answer to `_webout` needs `_webout` redirected while it runs.** `%webout` / `%mp_jsonout` write JSON straight to the `_webout` fileref, so calling such a macro inside a test corrupts the test's own response - the runner reports `invalid Json string`, or `No webout was returned by job`. Point the fileref at a temporary file for the duration, then put it back, because the test term program writes the results to `_webout` on the way out:
+
+```sas
+%let _webout_path=%sysfunc(pathname(_webout));
+filename _webout temp;
+
+%my_macro()          /* writes its JSON to the temp file */
+%mp_assert(iftrue=(&ok=1), desc=..., outds=work.test_results)
+
+filename _webout "&_webout_path" mod;   /* term program needs it back */
+```
+
+  Assert on the work datasets the macro builds, not on its JSON. Redirecting without restoring is the common half-fix: the macro runs clean and the run then fails with `No webout was returned by job`.
+
 ## Lint and build
 
 - Run `sasjs lint` after every change; do not consider work done until it passes
