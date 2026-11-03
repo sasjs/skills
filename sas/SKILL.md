@@ -195,6 +195,7 @@ This applies to every statement that accepts a list of operands - `%local`/`%glo
 - Macro timing issues: referencing `&macrovar` before it exists, `%if` evaluating data-step variables (use `if`/`symget` instead)
 - Automatic macro variables (`&syscc`, `&syswarningtext`, `&syserrortext`, `&sysdate`, `&sysuserid`, etc.) are READ-ONLY - attempting to overwrite them (e.g. `%let syswarningtext=;` or `call symput('syscc',...)`) raises `ERROR: Unable to assign value to a macro variable that is read only` (or similar). Never try to "clear" them.
 - Truncation from implicit length=8 on first assignment
+- **A comma inside an unquoted macro parameter value splits the parameter list.** `%mp_assert(desc=A missing path is reported as missing, with a reason, outds=work.test_results)` fails with `ERROR: All positional parameters must precede keyword parameters`, and the message points at the call rather than the comma - the tail becomes a positional argument. Keep commas out of unquoted values, or protect them with `%str()` / `%bquote()`. This bites hardest in `desc=`-style free text, where a comma reads as ordinary prose.
 - `proc sql` cartesian product warnings
 
 ## Limitations
