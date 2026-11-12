@@ -59,6 +59,13 @@ A setting that is absent takes its default, and so does a project with no `.sasj
 }
 ```
 
+The file is read as strict JSON, so it cannot carry comments - a commented file fails to parse. `$schema` is how a setting's documentation lives where it is written: `"$schema": "https://cli.sasjs.io/sasjslint-schema.json"` gives an editor completion, hover text and validation for every key. The schema ships inside the package as `sasjslint-schema.json`; the served URL is a six-line `$ref` shim in `sasjs/cli.sasjs.io`'s `docs/` folder pointing at `sasjs/lint`'s copy. `LintConfig` ignores keys it does not know, so `$schema` is safe in a file it reads.
+
+Who writes the file, and how complete it is:
+
+- `sasjs lint init` writes the package's `DefaultLintConfiguration` - every setting at its default, but `severityLevel: {}` and no `$schema`.
+- A SASjs Server seeds the drive root's `.sasjslint` at startup, from `api/src/utils/defaultLintConfiguration.json` in `sasjs/server` - every setting, a level named for each rule, and the `$schema` key. That same JSON seeds the demonstration site's drive, so the file a visitor sees in Studio is the one a real installation starts with. It is written only when absent, so an existing drive keeps its own rules.
+
 ## Rules and defaults
 
 Two groups, and the way you switch a rule off depends on which group it is in.
