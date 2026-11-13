@@ -127,7 +127,7 @@ filename _webout "&_webout_path" mod;   /* term program needs it back */
 ## Lint and build
 
 - Run `sasjs lint` after every change; do not consider work done until it passes
-- NEVER bump the version in `package.json` (semantic-release handles it)
+- NEVER bump the version in `package.json` by hand: the repo's release tooling owns it (semantic-release on most sasjs repos; a repo can carry its own release script instead - check its package.json scripts before assuming)
 - Do NOT edit generated files by hand: `all.sas`, `mc_*.sas`, the `lua/` wrappers, and `sasjsbuild/` outputs are produced by the CI build
 - Markdown files: never hard-wrap; one paragraph per line
 
