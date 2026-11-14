@@ -56,6 +56,19 @@ Use `mf_` macros when the macro returns a value usable in an expression; use `mp
 
 Before writing a new macro, check the library for an existing one - common utilities already exist, e.g. `mp_abort` (the deprecated `mf_abort` is retained for backwards compatibility - don't use it in new code), `mf_existds`, `mf_existvar`, `mf_existfileref`, `mf_getuser`, `mp_jsonout` (SAS datasets -> JSON for `_webout`), `mp_ds2ddl`, `mp_hashdataset`. Platform-specific variants exist under `meta/`, `viya/`, `server/` and are selected at compile time by the CLI.
 
+## Returning a value as text: the trailing-blank trap
+
+`mf_getapploc` and similar macros return their value by emitting text, and that text carries the leading blanks of the macro's final line (`  &root`). `%let x=%mf_getapploc(&_program);` therefore captures `"  /app/loc"`. `%trim` it before using it as a prefix:
+
+```sas
+%let applocus=%mf_getapploc(&_program);
+%let applocus=%trim(&applocus);
+%if "%substr(%upcase(&_program),1,%length(&apploc_test))"="&apploc_test" %then
+  %let is_test=1;
+```
+
+An unquoted string comparison in `%if` is a *numeric* one and stops the macro with `A character operand was found in the %EVAL function ... where a numeric operand is required`; quote both sides. Inside a SASjs service both mistakes surface as an approval that returns no webout (`Libref WEB3 is not assigned`), which reads like an undeployed service - run the calling test with `_debug=131` and read its log, since a test program keeps its own log.
+
 ## Aborting safely
 
 Never invoke `%mp_abort` from inside an `%if/%else` block - as a procedural macro, the macro processor can continue executing statements after it before the abort takes effect. Use the `iftrue=` condition parameter instead:
