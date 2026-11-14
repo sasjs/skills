@@ -56,18 +56,20 @@ Use `mf_` macros when the macro returns a value usable in an expression; use `mp
 
 Before writing a new macro, check the library for an existing one - common utilities already exist, e.g. `mp_abort` (the deprecated `mf_abort` is retained for backwards compatibility - don't use it in new code), `mf_existds`, `mf_existvar`, `mf_existfileref`, `mf_getuser`, `mp_jsonout` (SAS datasets -> JSON for `_webout`), `mp_ds2ddl`, `mp_hashdataset`. Platform-specific variants exist under `meta/`, `viya/`, `server/` and are selected at compile time by the CLI.
 
-## Returning a value as text: the trailing-blank trap
+## Comparing a returned value in `%if`
 
-`mf_getapploc` and similar macros return their value by emitting text, and that text carries the leading blanks of the macro's final line (`  &root`). `%let x=%mf_getapploc(&_program);` therefore captures `"  /app/loc"`. `%trim` it before using it as a prefix:
+`mf_getapploc` and the library's other text-returning macros emit their value cleanly - no leading or trailing blanks, verified by a contract test over six path shapes including the warning branch - so `%let root=%mf_getapploc(&_program)` needs no `%trim`.
+
+What bites is the comparison: an unquoted string comparison in `%if` is evaluated numerically and stops the macro with `A character operand was found in the %EVAL function ... where a numeric operand is required`. Quote both sides:
 
 ```sas
-%let applocus=%mf_getapploc(&_program);
-%let applocus=%trim(&applocus);
 %if "%substr(%upcase(&_program),1,%length(&apploc_test))"="&apploc_test" %then
   %let is_test=1;
 ```
 
-An unquoted string comparison in `%if` is a *numeric* one and stops the macro with `A character operand was found in the %EVAL function ... where a numeric operand is required`; quote both sides. Inside a SASjs service both mistakes surface as an approval that returns no webout (`Libref WEB3 is not assigned`), which reads like an undeployed service - run the calling test with `_debug=131` and read its log, since a test program keeps its own log.
+Inside a SASjs service that error surfaces as an approval returning no webout (`Libref WEB3 is not assigned`), which reads like an undeployed service; run the calling test with `_debug=131` and read its own log, since a test program keeps its log.
+
+When a fix "works now", make sure only one thing changed. Adding `%trim` and quoting the comparison in the same commit hid which one fixed it, and sent a non-bug into two repos.
 
 ## Aborting safely
 
