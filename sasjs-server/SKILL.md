@@ -114,17 +114,6 @@ Gotchas:
 - The packaged binaries (`api-linux` etc.) reject some globally-exported `NODE_OPTIONS` (e.g. `--network-family-autoselection`) - start with `NODE_OPTIONS="" ./api-linux`.
 - AppStream URLs redirect to a trailing slash (`/AppStream/MyApp` -> 301 -> `/AppStream/MyApp/`) - test/automation scripts should use the trailing-slash URL directly.
 
-## The published site is a browser host, not a server
-
-`server.sasjs.io` is the demonstration build: the real web bundle with `/SASjsApi` answered by a service worker, assembled by sasjs/server's `mock/build.mjs` from the host assets sasjs/cli ships (`src/commands/build/internal/mockSite/assets`). A bug reported "in sasjs/server" against that site is usually in the CLI's host, not the API:
-
-- the drive lives in IndexedDB, owned by the **page** (`persist.js`); the worker holds no durable state, and the browser terminates it between requests (idle timeout, ~30s).
-- a page boot loads the stored drive into the worker (`sasjs-load` / `sasjs-seed`). A worker that starts later, mid-session, must ask a live page for the drive before its grace turns into a seed - otherwise the visitor's drive reverts to the site's seed for the rest of the session: their files read `File doesn't exist.`, and a re-create of a shipped path (the drive-root `.sasjslint`) reads `File already exists.` A page reload brings the file back, which is the tell that storage is fine and the worker is the problem.
-
-Reproducing this without guessing: mirror the site (`index.html` plus its script and CSS tags, every `host/*` file - including `host/md5.js`, which `runtime-core.js` imports and the page never links - and the webpack chunks, fetched on demand), serve it on localhost so a worker registers, then stop the worker with CDP `ServiceWorker.stopAllWorkers` - the same thing the browser does to an idle worker. Compare `SASjsMock.stats()` before and after: a worker that re-seeded shows the seed's file count instead of the restored drive's, and a file created a moment earlier answers 404. A second tab open at the same time makes the multi-client failure visible in the same run.
-
-When fixing a handshake that crosses the page/worker boundary, review finds the same four things in the same order: ask ONE client (a page answers by loading the drive, so two answers are two installs); retry while a budget lasts rather than bounding the wait at a single timeout (a large or busy drive is not a failed one); distinguish "nothing stored" from "stored but unreadable" and never seed over the second; and capture the controller that asked, because the answer outlives the page's own globals - a late `navigator` access rejects inside a jest worker and surfaces as a `ReferenceError` in whichever unrelated suite is running by then.
-
 ## Limitations
 
 This skill is a static reference for SASjs Server - it provides guidance on installing, configuring, and running the server. It does not execute code, run shell commands, access the filesystem, connect to databases, or make network requests. References to environment variables, auth tokens, and server configuration describe what the server software uses at runtime - this skill does not read, write, or access those values itself. Terms like "execution", "runtime", and "process" refer to the SASjs Server software's behavior, not to operations performed by this skill.
