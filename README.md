@@ -17,7 +17,7 @@ npx skills add sasjs/skills@sasjs-core # install one skill
 npx skills use sasjs/skills@sas        # generate a prompt for one skill w/o installing
 ```
 
-Available skill names: `sas`, `sas-packages`, `sasjs-core`, `sasjs-cli`, `sasjs-adapter`, `sasjs-framework`, `sasjs-lint`, `sasjs-server`.
+Available skill names: `sas`, `sas-packages`, `sasjs-core`, `sasjs-cli`, `sasjs-adapter`, `sasjs-framework`, `sasjs-lint`, `sasjs-release`, `sasjs-server`.
 
 Other useful commands:
 
@@ -36,6 +36,7 @@ npx skills remove sasjs-core     # remove a skill
 | `sasjs-adapter` | Frontend/Node integration with SAS backends via @sasjs/adapter (requests, auth per server type, sessions, file upload). |
 | `sasjs-framework` | Building full SASjs applications - project layout, sasjsconfig.json (schema included), service contract, multi-target discipline, quality gates. |
 | `sasjs-lint` | Linting and formatting SAS code with @sasjs/lint - the `.sasjslint` rules and defaults, severityLevel and exit codes, per-file `@sasjslint` overrides, formatter coverage, and how the CLI, VS Code extension and SASjs Server run it. |
+| `sasjs-release` | Cutting releases with @sasjs/release - conventional-commit classification, the tag as the version, attaching and verifying assets, the draft lifecycle (a GitHub draft creates no tag until it is published), what `--prepare-publish` decides, migrating off semantic-release, and changing the tool. |
 | `sasjs-server` | Installing/configuring/running @sasjs/server - desktop vs server modes, runtimes (SAS/JS/Python/R), env vars, LDAP auth, mock server types, REST API. |
 
 ## Using with GitHub Copilot in VS Code
